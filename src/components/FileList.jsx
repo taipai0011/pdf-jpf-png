@@ -37,9 +37,9 @@ export default function FileList({ files, onRemove, onReorder, onClearAll }) {
     <section className="mx-auto max-w-6xl px-5 sm:px-8">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-baseline gap-2">
-          <h3 className="text-sm font-semibold text-zinc-100">Files</h3>
-          <span className="text-xs text-zinc-500">
-            {files.length} item{files.length === 1 ? '' : 's'} · drag to reorder
+          <h3 className="text-sm font-semibold text-ink-900">Files</h3>
+          <span className="text-xs text-ink-500">
+            {files.length} item{files.length === 1 ? '' : 's'} &middot; drag to reorder
           </span>
         </div>
         <button type="button" onClick={onClearAll} className="btn-danger">

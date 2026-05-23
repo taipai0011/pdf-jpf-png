@@ -9,6 +9,10 @@ function formatBytes(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
+/**
+ * Sortable file row. Light mode: white card with the same whisper-thin
+ * purple border used elsewhere; lifts on hover and on drag.
+ */
 export default function FileCard({ file, onRemove, index }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: file.id,
@@ -26,15 +30,15 @@ export default function FileCard({ file, onRemove, index }) {
       ref={setNodeRef}
       style={style}
       className={[
-        'group relative glass-soft p-3 flex items-center gap-3 select-none',
-        'transition-shadow duration-200',
-        isDragging ? 'opacity-70 ring-2 ring-accent-400/50 shadow-glow z-10' : '',
+        'group relative card p-3 flex items-center gap-3 select-none',
+        'transition-shadow duration-200 hover:shadow-card-hover',
+        isDragging ? 'opacity-90 ring-2 ring-accent-400/50 shadow-glow z-10' : '',
       ].join(' ')}
     >
       {/* Drag handle */}
       <button
         type="button"
-        className="cursor-grab active:cursor-grabbing text-zinc-500 hover:text-zinc-200 transition-colors p-1 -ml-1"
+        className="cursor-grab active:cursor-grabbing text-ink-400 hover:text-ink-700 transition-colors p-1 -ml-1"
         aria-label={`Drag to reorder ${file.name}`}
         {...attributes}
         {...listeners}
@@ -43,22 +47,25 @@ export default function FileCard({ file, onRemove, index }) {
       </button>
 
       {/* Index badge */}
-      <div className="hidden sm:flex flex-none items-center justify-center w-7 h-7 rounded-md bg-white/[0.05] border border-white/10 text-[11px] font-mono text-zinc-300">
+      <div className="hidden sm:flex flex-none items-center justify-center w-7 h-7 rounded-md bg-accent-50 border border-accent-200/60 text-[11px] font-mono text-accent-700">
         {String(index + 1).padStart(2, '0')}
       </div>
 
       {/* Thumbnail */}
-      <div className="flex-none w-14 h-14 rounded-lg overflow-hidden bg-ink-700 border border-white/10 relative">
+      <div
+        className="flex-none w-14 h-14 rounded-lg overflow-hidden bg-ink-50 relative"
+        style={{ border: '1px solid rgba(109, 74, 255, 0.10)' }}
+      >
         {file.thumbnail ? (
           // eslint-disable-next-line jsx-a11y/alt-text
           <img src={file.thumbnail} className="w-full h-full object-cover" loading="lazy" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-zinc-500">
+          <div className="w-full h-full flex items-center justify-center text-ink-400">
             {isPdf ? <FileText className="w-5 h-5" /> : <ImageIcon className="w-5 h-5" />}
           </div>
         )}
         {isPdf && file.pageCount > 1 ? (
-          <span className="absolute bottom-1 right-1 text-[10px] px-1.5 py-[1px] rounded bg-black/60 text-white font-mono">
+          <span className="absolute bottom-1 right-1 text-[10px] px-1.5 py-[1px] rounded bg-ink-900/85 text-white font-mono">
             {file.pageCount}p
           </span>
         ) : null}
@@ -68,14 +75,14 @@ export default function FileCard({ file, onRemove, index }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 min-w-0">
           {isPdf ? (
-            <FileText className="w-3.5 h-3.5 text-rose-300 flex-none" />
+            <FileText className="w-3.5 h-3.5 text-rose-600 flex-none" />
           ) : (
-            <ImageIcon className="w-3.5 h-3.5 text-sky-300 flex-none" />
+            <ImageIcon className="w-3.5 h-3.5 text-sky-600 flex-none" />
           )}
-          <div className="text-sm text-zinc-100 truncate">{file.name}</div>
+          <div className="text-sm text-ink-900 truncate font-medium">{file.name}</div>
         </div>
-        <div className="mt-0.5 text-[11px] text-zinc-400 font-mono">
-          {isPdf ? 'PDF' : file.type.replace('image/', '').toUpperCase()} ·{' '}
+        <div className="mt-0.5 text-[11px] text-ink-500 font-mono">
+          {isPdf ? 'PDF' : (file.type || '').replace('image/', '').toUpperCase()} ·{' '}
           {formatBytes(file.size)}
           {isPdf && file.pageCount ? ` · ${file.pageCount} page${file.pageCount === 1 ? '' : 's'}` : ''}
         </div>
@@ -86,7 +93,7 @@ export default function FileCard({ file, onRemove, index }) {
         type="button"
         onClick={() => onRemove(file.id)}
         className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity
-                   inline-flex items-center justify-center w-8 h-8 rounded-md text-zinc-400 hover:text-rose-300 hover:bg-rose-500/10"
+                   inline-flex items-center justify-center w-8 h-8 rounded-md text-ink-400 hover:text-rose-600 hover:bg-rose-50"
         aria-label={`Remove ${file.name}`}
       >
         <X className="w-4 h-4" />

@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   html,
@@ -16,20 +16,21 @@
   }
 
   body {
-    @apply bg-ink-950 text-zinc-100 antialiased font-sans;
+    @apply bg-canvas text-ink-900 antialiased font-sans;
+    /* Layered ambient washes - subtle, never flat */
     background-image:
-      radial-gradient(60rem 40rem at 12% -10%, rgba(124, 92, 255, 0.18), transparent 60%),
-      radial-gradient(50rem 36rem at 100% 0%, rgba(56, 189, 248, 0.10), transparent 60%),
-      radial-gradient(40rem 30rem at 50% 110%, rgba(236, 72, 153, 0.08), transparent 60%);
+      radial-gradient(60rem 40rem at 12% -10%, rgba(109, 74, 255, 0.06), transparent 60%),
+      radial-gradient(50rem 36rem at 100% 0%, rgba(56, 189, 248, 0.04), transparent 60%),
+      radial-gradient(40rem 30rem at 50% 110%, rgba(236, 72, 153, 0.03), transparent 60%);
     background-attachment: fixed;
   }
 
   ::selection {
-    background: rgba(124, 92, 255, 0.35);
-    color: #fff;
+    background: rgba(109, 74, 255, 0.18);
+    color: #0f0d1a;
   }
 
-  /* Scrollbars */
+  /* Light, low-contrast scrollbars */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -38,74 +39,128 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(15, 13, 26, 0.10);
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(15, 13, 26, 0.20);
     border: 2px solid transparent;
     background-clip: padding-box;
   }
 }
 
 @layer components {
-  .glass {
-    @apply bg-white/[0.04] backdrop-blur-xl border border-white/[0.07] rounded-2xl;
+  /* ---------- Surfaces ---------- */
+
+  /* Pure-white floating card with whisper-thin purple border */
+  .card {
+    @apply rounded-2xl bg-surface;
+    border: 1px solid rgba(109, 74, 255, 0.08);
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-      0 24px 60px -24px rgba(0, 0, 0, 0.55);
+      0 1px 3px rgba(15, 13, 26, 0.05),
+      0 6px 20px -6px rgba(15, 13, 26, 0.07);
   }
 
-  .glass-soft {
-    @apply bg-white/[0.025] backdrop-blur-md border border-white/[0.06] rounded-xl;
+  /* Slightly translucent variant for nested elements on a wash band */
+  .card-soft {
+    @apply rounded-xl;
+    background: rgba(255, 255, 255, 0.66);
+    border: 1px solid rgba(109, 74, 255, 0.06);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
+
+  /* Frosted glass for the navbar and overlays */
+  .glass {
+    @apply rounded-2xl;
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgba(109, 74, 255, 0.10);
+    box-shadow:
+      0 1px 3px rgba(15, 13, 26, 0.04),
+      0 8px 28px -10px rgba(15, 13, 26, 0.10);
+  }
+
+  /* Dot-grid overlay (Notion / Linear style) */
+  .dot-grid {
+    background-image: radial-gradient(circle, rgba(109, 74, 255, 0.13) 1px, transparent 1px);
+    background-size: 22px 22px;
+    background-position: 0 0;
+  }
+
+  /* Soft purple radial glow used behind hero headings */
+  .hero-radial {
+    background: radial-gradient(ellipse at 50% 0%, rgba(109, 74, 255, 0.08) 0%, transparent 70%);
+  }
+
+  /* ---------- Buttons ---------- */
 
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium
            transition-all duration-200 ease-out select-none
            focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400/60 focus-visible:ring-offset-2
-           focus-visible:ring-offset-ink-950 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
+           focus-visible:ring-offset-canvas disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
   }
 
   .btn-primary {
     @apply btn text-white;
-    background: linear-gradient(135deg, #8a6dff 0%, #6543e8 50%, #5234c0 100%);
+    background: linear-gradient(135deg, #8466ff 0%, #6d4aff 50%, #5a37e0 100%);
     box-shadow:
       0 1px 0 0 rgba(255, 255, 255, 0.18) inset,
-      0 10px 28px -10px rgba(124, 92, 255, 0.6);
+      0 4px 14px rgba(109, 74, 255, 0.30),
+      0 10px 28px -10px rgba(109, 74, 255, 0.35);
   }
   .btn-primary:hover {
-    filter: brightness(1.08);
     transform: translateY(-1px);
+    filter: brightness(1.04);
     box-shadow:
       0 1px 0 0 rgba(255, 255, 255, 0.22) inset,
-      0 14px 32px -10px rgba(124, 92, 255, 0.7);
+      0 6px 18px rgba(109, 74, 255, 0.42),
+      0 14px 34px -8px rgba(109, 74, 255, 0.50);
   }
   .btn-primary:active {
     transform: translateY(0);
-    filter: brightness(0.96);
+    filter: brightness(0.98);
   }
 
   .btn-ghost {
-    @apply btn text-zinc-200 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.14];
+    @apply btn text-ink-700 bg-white;
+    border: 1px solid rgba(109, 74, 255, 0.12);
+    box-shadow: 0 1px 2px rgba(15, 13, 26, 0.03);
+  }
+  .btn-ghost:hover {
+    background: #faf9ff;
+    border-color: rgba(109, 74, 255, 0.24);
   }
 
   .btn-danger {
-    @apply btn text-rose-200 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 hover:text-rose-100;
+    @apply btn text-rose-700 bg-rose-50;
+    border: 1px solid rgba(244, 63, 94, 0.18);
+  }
+  .btn-danger:hover {
+    background: #ffe4e6;
+    border-color: rgba(244, 63, 94, 0.30);
   }
 
+  /* ---------- Small bits ---------- */
+
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] border border-white/10 px-2.5 py-1 text-xs text-zinc-300;
+    @apply inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs;
+    color: #4a4862;
+    border: 1px solid rgba(109, 74, 255, 0.10);
+    box-shadow: 0 1px 2px rgba(15, 13, 26, 0.03);
   }
 
   .field-label {
-    @apply text-xs uppercase tracking-[0.14em] text-zinc-400 font-medium;
+    @apply text-[11px] uppercase tracking-[0.14em] text-ink-500 font-semibold;
   }
 
+  /* Brand gradient text - dark enough to feel premium on light bg */
   .gradient-text {
-    background: linear-gradient(135deg, #fff 0%, #d8cdff 50%, #b29aff 100%);
+    background: linear-gradient(135deg, #1a1340 0%, #4729b3 50%, #6d4aff 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -115,9 +170,9 @@
   .shimmer {
     background: linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.04) 0%,
-      rgba(255, 255, 255, 0.12) 50%,
-      rgba(255, 255, 255, 0.04) 100%
+      rgba(109, 74, 255, 0.04) 0%,
+      rgba(109, 74, 255, 0.10) 50%,
+      rgba(109, 74, 255, 0.04) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 2.2s linear infinite;
@@ -130,5 +185,11 @@
   }
   .no-scrollbar {
     scrollbar-width: none;
+  }
+
+  /* Fade the dot grid out toward edges so it never feels like a tablecloth */
+  .dot-grid-mask {
+    -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 75%);
   }
 }

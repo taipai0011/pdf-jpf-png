@@ -27,34 +27,43 @@ export default {
         ],
       },
       colors: {
+        // Page-level surfaces
+        canvas: '#f8f7ff', // primary background, warm off-white
+        wash: '#f0eeff', // alternating section background
+        surface: '#ffffff', // cards
+        // Text scale (warm purple-tinted near-blacks)
         ink: {
-          950: '#07070b',
-          900: '#0a0a0f',
-          800: '#101019',
-          700: '#161622',
-          600: '#1c1c2b',
-          500: '#252537',
-          400: '#3a3a50',
+          900: '#0f0d1a',
+          800: '#1d1a30',
+          700: '#2a2640',
+          600: '#4a4862',
+          500: '#6b6880',
+          400: '#8e8ba6',
+          300: '#bcb9cf',
+          200: '#dcd9ec',
+          100: '#eae7f6',
+          50: '#f4f2fb',
         },
+        // Brand purple
         accent: {
-          DEFAULT: '#7c5cff',
+          DEFAULT: '#6d4aff',
           50: '#f3f0ff',
-          100: '#e7e1ff',
-          200: '#cfc1ff',
-          300: '#b29aff',
-          400: '#9276ff',
+          100: '#e9e3ff',
+          200: '#d4caff',
+          300: '#b8a8ff',
+          400: '#9b80ff',
           500: '#7c5cff',
-          600: '#6543e8',
-          700: '#5234c0',
-          800: '#3f2899',
-          900: '#2c1c6e',
+          600: '#6d4aff',
+          700: '#5a37e0',
+          800: '#4729b3',
+          900: '#341e80',
         },
       },
       animation: {
         'fade-in': 'fadeIn 320ms ease-out forwards',
         'slide-up': 'slideUp 360ms cubic-bezier(0.22, 1, 0.36, 1) forwards',
         'pulse-soft': 'pulseSoft 2.4s ease-in-out infinite',
-        'shimmer': 'shimmer 2.2s linear infinite',
+        shimmer: 'shimmer 2.2s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -75,9 +84,13 @@ export default {
         },
       },
       boxShadow: {
-        'glow': '0 0 0 1px rgba(124, 92, 255, 0.25), 0 12px 40px -8px rgba(124, 92, 255, 0.35)',
-        'soft': '0 8px 28px -10px rgba(0, 0, 0, 0.6)',
-        'card': '0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 8px 32px -12px rgba(0, 0, 0, 0.5)',
+        // Whisper-soft elevation, tuned for light backgrounds
+        card: '0 1px 3px rgba(15, 13, 26, 0.05), 0 6px 20px -6px rgba(15, 13, 26, 0.07)',
+        'card-hover': '0 1px 3px rgba(15, 13, 26, 0.06), 0 14px 32px -8px rgba(15, 13, 26, 0.10)',
+        glow: '0 4px 14px rgba(109, 74, 255, 0.30), 0 8px 24px -8px rgba(109, 74, 255, 0.35)',
+        'glow-strong':
+          '0 6px 18px rgba(109, 74, 255, 0.42), 0 14px 32px -8px rgba(109, 74, 255, 0.50)',
+        soft: '0 8px 28px -12px rgba(15, 13, 26, 0.18)',
       },
       backdropBlur: {
         xs: '2px',
