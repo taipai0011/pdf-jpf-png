@@ -136,23 +136,27 @@ export default function App() {
               borderColor: 'rgba(109, 74, 255, 0.10)',
             }}
           >
-            <div className="space-y-6 sm:space-y-7">
-              <FileList
-                files={files}
-                onRemove={removeFile}
-                onReorder={reorderFiles}
-                onClearAll={clearAll}
-              />
-              <MergeOptions
-                orientation={orientation}
-                setOrientation={setOrientation}
-                format={format}
-                setFormat={setFormat}
-                canMerge={canMerge}
-                busy={progress.open}
-                onPreview={() => runMerge({ openPreview: true })}
-                onMerge={() => runMerge({ openPreview: false })}
-              />
+            <div className="mx-auto max-w-6xl px-5 sm:px-8">
+              <div className="grid gap-6 lg:gap-7 lg:grid-cols-[minmax(0,1fr)_280px]">
+                <FileList
+                  files={files}
+                  onRemove={removeFile}
+                  onReorder={reorderFiles}
+                  onClearAll={clearAll}
+                />
+                <aside className="lg:sticky lg:top-20 lg:self-start">
+                  <MergeOptions
+                    orientation={orientation}
+                    setOrientation={setOrientation}
+                    format={format}
+                    setFormat={setFormat}
+                    canMerge={canMerge}
+                    busy={progress.open}
+                    onPreview={() => runMerge({ openPreview: true })}
+                    onMerge={() => runMerge({ openPreview: false })}
+                  />
+                </aside>
+              </div>
             </div>
           </section>
         )}
