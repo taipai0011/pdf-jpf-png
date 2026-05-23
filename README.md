@@ -13,7 +13,7 @@ A privacy-first, fully client-side merger for **JPG**, **PNG** and **PDF** files
 - Choose output format: **PDF**, **PNG**, or **JPG**
 - Preview the merged result before downloading
 - IndexedDB-backed local storage with a visible 1-hour countdown
-- Premium dark glassmorphism UI, fully responsive
+- Premium light theme inspired by ilovepdf + Linear / Vercel polish, fully responsive
 - 100% client-side — no server, no uploads, no tracking
 
 ## Tech stack
@@ -49,37 +49,39 @@ npm run preview
 
 ### Environment
 
-The Vite `base` path is read from `VITE_BASE_PATH` so the same build works
-whether you serve from the root or from a sub-path (e.g. GitHub Pages):
+The Vite `base` path defaults to `/`, which is what Vercel (and most hosts)
+serve from. If you ever need to host under a sub-path you can override it:
 
 ```bash
-# Local / Vercel / Netlify (root)
-npm run build
-
-# GitHub Pages under /pdf-jpf-png/
-VITE_BASE_PATH=/pdf-jpf-png/ npm run build
+VITE_BASE_PATH=/some-subpath/ npm run build
 ```
 
 ## Deployment
 
-### GitHub Pages (configured)
+### Vercel (production)
 
-This repo ships with a [GitHub Actions workflow](./.github/workflows/deploy.yml) that:
+The repo is connected to Vercel, which auto-deploys:
 
-1. Installs dependencies and lints the project.
-2. Builds the site with the correct `VITE_BASE_PATH` for GitHub Pages.
-3. Publishes `./dist` to GitHub Pages on every push to `main`.
+- **Production** on every push to `main`
+- **Preview** for every pull request
 
-To enable it once after merging this PR:
+No configuration is required — Vercel auto-detects the Vite build (`npm run build`, output in `./dist`).
 
-1. Go to **Settings → Pages** in your repository.
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-3. Push to `main` (or re-run the workflow).
-4. The site will be served at `https://<owner>.github.io/<repo>/`.
+### CI
 
-### Vercel / Netlify
+[`.github/workflows/ci.yml`](./.github/workflows/ci.yml) runs `npm install`, lint, and `npm run build` on every push and pull request. It does not deploy anywhere — Vercel handles that.
 
-Either platform works out of the box: the build command is `npm run build` and the publish directory is `dist`. No `VITE_BASE_PATH` needs to be set.
+### Other static hosts
+
+The site is a fully static SPA. To host elsewhere (Netlify, Cloudflare Pages, GitHub Pages, S3, etc.):
+
+```bash
+npm install
+npm run build      # outputs to ./dist
+# upload the contents of ./dist to your host
+```
+
+For sub-path hosting (e.g. GitHub Pages under `/pdf-jpf-png/`), pass `VITE_BASE_PATH=/pdf-jpf-png/` to the build.
 
 ## How merging works
 
