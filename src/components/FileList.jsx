@@ -15,6 +15,10 @@ import {
 import { Trash2 } from 'lucide-react';
 import FileCard from './FileCard.jsx';
 
+/**
+ * Self-contained file list. The parent owns max-width / grid layout so this
+ * component can be slotted into the workspace grid alongside the sidebar.
+ */
 export default function FileList({ files, onRemove, onReorder, onClearAll }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -34,7 +38,7 @@ export default function FileList({ files, onRemove, onReorder, onClearAll }) {
   if (files.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-6xl px-5 sm:px-8">
+    <div className="min-w-0">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-baseline gap-2">
           <h3 className="text-sm font-semibold text-ink-900">Files</h3>
@@ -59,6 +63,6 @@ export default function FileList({ files, onRemove, onReorder, onClearAll }) {
           </ul>
         </SortableContext>
       </DndContext>
-    </section>
+    </div>
   );
 }
