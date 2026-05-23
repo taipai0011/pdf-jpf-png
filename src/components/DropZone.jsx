@@ -1,9 +1,13 @@
 import { useCallback, useRef, useState } from 'react';
-import { FileImage, FileText, UploadCloud } from 'lucide-react';
+import { UploadCloud } from 'lucide-react';
 
 /**
- * Drag-and-drop upload area. Light mode: faint lavender background with
- * a dashed purple border that warms up on hover.
+ * Compact, ilovepdf-style drop zone:
+ *  - Bold purple solid fill
+ *  - White dashed inner border
+ *  - Icon + tagline on the left, pill-shaped white "Choose files" CTA on the right
+ *  - About half the height of the previous airy variant
+ *  - Hovers and drag-over deepen the gradient and tighten the border
  */
 export default function DropZone({ onFiles, busy }) {
   const inputRef = useRef(null);
@@ -36,65 +40,52 @@ export default function DropZone({ onFiles, busy }) {
         }}
         onDragLeave={() => setHovering(false)}
         onDrop={onDrop}
-        className={[
-          'group relative block cursor-pointer overflow-hidden rounded-2xl',
-          'transition-all duration-300',
-        ].join(' ')}
+        className="group relative block cursor-pointer overflow-hidden rounded-2xl transition-all duration-200"
         style={{
-          background: hovering ? 'rgba(109, 74, 255, 0.05)' : '#faf9ff',
-          border: '1.5px dashed',
-          borderColor: hovering ? 'rgba(109, 74, 255, 0.55)' : 'rgba(109, 74, 255, 0.20)',
+          background: hovering
+            ? 'linear-gradient(135deg, #8466ff 0%, #6d4aff 50%, #4729b3 100%)'
+            : 'linear-gradient(135deg, #7c5cff 0%, #6d4aff 55%, #5a37e0 100%)',
           boxShadow: hovering
-            ? '0 0 0 4px rgba(109, 74, 255, 0.08), 0 12px 32px -8px rgba(109, 74, 255, 0.20)'
-            : '0 1px 3px rgba(15, 13, 26, 0.03)',
+            ? '0 14px 36px -10px rgba(109,74,255,0.55), 0 6px 16px rgba(109,74,255,0.32)'
+            : '0 10px 28px -10px rgba(109,74,255,0.45), 0 4px 14px rgba(109,74,255,0.28)',
         }}
       >
-        {/* Decorative top sheen */}
+        {/* Soft top sheen for depth */}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'radial-gradient(60% 80% at 50% 0%, rgba(109, 74, 255, 0.06), transparent 60%)',
+              'radial-gradient(60% 80% at 50% 0%, rgba(255,255,255,0.18), transparent 70%)',
           }}
           aria-hidden
         />
 
-        <div className="relative flex flex-col items-center text-center px-6 py-14 sm:py-16">
-          <div className="relative mb-5">
+        {/* Dashed inner frame */}
+        <div
+          className="relative m-3 sm:m-4 rounded-xl flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 sm:gap-6 px-5 sm:px-7 py-5 sm:py-6 transition-colors duration-200"
+          style={{
+            border: '2px dashed',
+            borderColor: hovering ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.40)',
+          }}
+        >
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <div
-              className={[
-                'absolute inset-0 rounded-2xl blur-xl transition-opacity duration-300',
-                hovering ? 'opacity-100' : 'opacity-60',
-              ].join(' ')}
-              style={{ background: 'rgba(109, 74, 255, 0.25)' }}
-              aria-hidden
-            />
-            <div
-              className="relative w-14 h-14 rounded-2xl flex items-center justify-center bg-white"
+              className="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl shrink-0"
               style={{
-                border: '1px solid rgba(109, 74, 255, 0.16)',
-                boxShadow: '0 4px 12px rgba(109, 74, 255, 0.10)',
+                background: 'rgba(255,255,255,0.16)',
+                border: '1px solid rgba(255,255,255,0.28)',
               }}
             >
-              <UploadCloud className="w-6 h-6 text-accent-600" strokeWidth={2} />
+              <UploadCloud className="w-5 h-5 sm:w-[22px] sm:h-[22px] text-white" strokeWidth={2.2} />
             </div>
-          </div>
-
-          <h2 className="text-xl sm:text-2xl font-semibold tracking-tight gradient-text">
-            Drop files to merge
-          </h2>
-          <p className="mt-2 text-sm text-ink-500 max-w-md">
-            Drag &amp; drop JPG, PNG or PDF files here, or click to browse. Everything
-            stays in your browser.
-          </p>
-
-          <div className="mt-5 flex items-center gap-2 text-xs">
-            <span className="chip">
-              <FileImage className="w-3.5 h-3.5 text-sky-600" /> JPG / PNG
-            </span>
-            <span className="chip">
-              <FileText className="w-3.5 h-3.5 text-rose-600" /> PDF
-            </span>
+            <div className="text-center sm:text-left min-w-0">
+              <div className="text-white text-base sm:text-lg font-semibold tracking-tight leading-tight">
+                Drop files to merge
+              </div>
+              <div className="text-white/75 text-xs sm:text-sm leading-snug">
+                JPG, PNG or PDF &middot; stays in your browser
+              </div>
+            </div>
           </div>
 
           <button
@@ -104,7 +95,11 @@ export default function DropZone({ onFiles, busy }) {
               inputRef.current?.click();
             }}
             disabled={busy}
-            className="btn-primary mt-7"
+            className="shrink-0 inline-flex items-center justify-center rounded-full bg-white px-5 sm:px-6 py-2.5 text-sm font-semibold text-accent-700 transition-all duration-200 hover:bg-white/95 active:translate-y-[1px] disabled:opacity-70 disabled:cursor-not-allowed"
+            style={{
+              boxShadow:
+                '0 1px 0 rgba(255,255,255,0.6) inset, 0 6px 16px -4px rgba(15,13,26,0.18), 0 2px 4px rgba(15,13,26,0.10)',
+            }}
           >
             {busy ? 'Reading...' : 'Choose files'}
           </button>
