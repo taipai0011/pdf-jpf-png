@@ -6,7 +6,8 @@ function Toggle({ value, options, onChange, label }) {
       <div className="field-label mb-2">{label}</div>
       <div
         role="radiogroup"
-        className="inline-flex items-center gap-1 rounded-xl bg-white/[0.04] border border-white/10 p-1"
+        className="inline-flex items-center gap-1 rounded-xl bg-ink-50 p-1"
+        style={{ border: '1px solid rgba(109, 74, 255, 0.10)' }}
       >
         {options.map((opt) => {
           const active = value === opt.value;
@@ -20,9 +21,14 @@ function Toggle({ value, options, onChange, label }) {
               className={[
                 'relative inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm transition-all duration-200',
                 active
-                  ? 'bg-gradient-to-b from-white/[0.10] to-white/[0.04] text-white shadow-soft border border-white/10'
-                  : 'text-zinc-400 hover:text-zinc-200',
+                  ? 'bg-white text-ink-900 shadow-card font-medium'
+                  : 'text-ink-500 hover:text-ink-900',
               ].join(' ')}
+              style={
+                active
+                  ? { border: '1px solid rgba(109, 74, 255, 0.16)' }
+                  : undefined
+              }
             >
               {opt.icon}
               <span>{opt.label}</span>
@@ -46,7 +52,7 @@ export default function MergeOptions({
 }) {
   return (
     <section className="mx-auto max-w-6xl px-5 sm:px-8">
-      <div className="glass p-5 sm:p-6">
+      <div className="card p-5 sm:p-6">
         <div className="grid gap-6 sm:grid-cols-2 sm:items-end">
           <Toggle
             label="Layout"

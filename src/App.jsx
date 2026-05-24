@@ -35,6 +35,7 @@ export default function App() {
   );
 
   const canMerge = files.length >= 1 && hydrated;
+  const hasFiles = files.length > 0;
 
   async function runMerge({ openPreview }) {
     if (!canMerge) return;
@@ -46,22 +47,18 @@ export default function App() {
         onProgress: (v, l) => setProgress({ open: true, value: v, label: l }),
       });
 
-      // Revoke previous preview URL if any.
       if (preview.url) URL.revokeObjectURL(preview.url);
 
       if (openPreview) {
         setPreview({ open: true, blob, url: previewUrl, filename });
       } else {
         triggerDownload(blob, filename);
-        // Free the preview URL since we won't show it.
         URL.revokeObjectURL(previewUrl);
         setPreview({ open: false, blob: null, url: null, filename: '' });
       }
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
-      // Surface error briefly via window alert; in a fuller app we'd
-      // route this through the Toast component.
       // eslint-disable-next-line no-alert
       alert(`Merge failed: ${e.message || e}`);
     } finally {
@@ -77,7 +74,6 @@ export default function App() {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    // Defer revoke slightly so the browser has a chance to start the download.
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
@@ -85,42 +81,80 @@ export default function App() {
     <div className="min-h-full flex flex-col">
       <Header />
 
-      <main className="flex-1 space-y-6 sm:space-y-7 pb-10">
-        <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-2 sm:pt-3">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight gradient-text">
-              Merge images &amp; PDFs, privately.
-            </h1>
-            <p className="mt-3 text-zinc-400 text-sm sm:text-base max-w-xl">
-              Combine JPGs, PNGs and PDFs into a single document or image &mdash;
-              horizontally or vertically. Files stay in your browser and disappear
-              automatically after one hour.
-            </p>
+      <main className="flex-1 pb-10">
+        {/* HERO — dot grid + radial glow on the canvas background */}
+        <section className="relative overflow-hidden">
+          {/* Dot-grid (faded toward edges) */}
+          <div
+            className="pointer-events-none absolute inset-0 dot-grid dot-grid-mask opacity-90"
+            aria-hidden
+          />
+          {/* Soft purple radial behind the heading */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] hero-radial" aria-hidden />
+
+          <div className="relative mx-auto max-w-6xl px-5 sm:px-8 pt-10 sm:pt-14 pb-8 sm:pb-12">
+            <div className="max-w-2xl">
+              <span
+                className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[11px] font-medium text-accent-700 uppercase tracking-[0.16em]"
+                style={{
+                  border: '1px solid rgba(109, 74, 255, 0.16)',
+                  boxShadow: '0 1px 2px rgba(15, 13, 26, 0.04)',
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-500" />
+                Free &middot; private &middot; client-side
+              </span>
+              <h1 className="mt-5 text-4xl sm:text-6xl font-semibold tracking-tight gradient-text leading-[1.05]">
+                Merge images &amp; PDFs,
+                <br className="hidden sm:block" /> privately.
+              </h1>
+              <p className="mt-4 text-ink-500 text-base sm:text-lg max-w-xl">
+                Combine JPGs, PNGs and PDFs into a single document or image &mdash;
+                horizontally or vertically. Files stay in your browser and disappear
+                automatically after one hour.
+              </p>
+            </div>
           </div>
         </section>
 
-        <PrivacyBanner nextExpiryAt={nextExpiryAt} hasFiles={files.length > 0} />
+        {/* Privacy banner sits between hero and dropzone, on canvas bg */}
+        <div className="relative pb-6">
+          <PrivacyBanner nextExpiryAt={nextExpiryAt} hasFiles={hasFiles} />
+        </div>
 
-        <DropZone onFiles={addFiles} busy={busy} />
+        {/* Drop zone — still on canvas */}
+        <div className="relative">
+          <DropZone onFiles={addFiles} busy={busy} />
+        </div>
 
-        <FileList
-          files={files}
-          onRemove={removeFile}
-          onReorder={reorderFiles}
-          onClearAll={clearAll}
-        />
-
-        {files.length > 0 && (
-          <MergeOptions
-            orientation={orientation}
-            setOrientation={setOrientation}
-            format={format}
-            setFormat={setFormat}
-            canMerge={canMerge}
-            busy={progress.open}
-            onPreview={() => runMerge({ openPreview: true })}
-            onMerge={() => runMerge({ openPreview: false })}
-          />
+        {/* Workspace band — wash background, alternates from canvas */}
+        {hasFiles && (
+          <section
+            className="relative mt-8 sm:mt-10 py-8 sm:py-10 border-y"
+            style={{
+              background: '#f0eeff',
+              borderColor: 'rgba(109, 74, 255, 0.10)',
+            }}
+          >
+            <div className="space-y-6 sm:space-y-7">
+              <FileList
+                files={files}
+                onRemove={removeFile}
+                onReorder={reorderFiles}
+                onClearAll={clearAll}
+              />
+              <MergeOptions
+                orientation={orientation}
+                setOrientation={setOrientation}
+                format={format}
+                setFormat={setFormat}
+                canMerge={canMerge}
+                busy={progress.open}
+                onPreview={() => runMerge({ openPreview: true })}
+                onMerge={() => runMerge({ openPreview: false })}
+              />
+            </div>
+          </section>
         )}
       </main>
 
