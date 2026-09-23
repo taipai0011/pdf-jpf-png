@@ -13,7 +13,7 @@
 import { openDB } from 'idb';
 
 export const EXPIRY_MS = 60 * 60 * 1000; // 1 hour
-const DB_NAME = 'mergely';
+const DB_NAME = 'filesmith';
 const DB_VERSION = 1;
 const STORE = 'files';
 

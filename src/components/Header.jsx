@@ -29,7 +29,7 @@ export default function Header({ onHome }) {
             </div>
           </div>
           <div className="leading-tight text-left">
-            <div className="font-semibold tracking-tight text-ink-900">Mergely</div>
+            <div className="font-semibold tracking-tight text-ink-900">Filesmith</div>
             <div className="text-[10px] text-ink-500 font-mono tracking-[0.14em]">
               in-browser file tools
             </div>

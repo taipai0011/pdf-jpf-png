@@ -1,9 +1,9 @@
 {
-  "name": "mergely",
+  "name": "filesmith",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "In-browser image and PDF toolkit — convert, split, merge and compress JPG, PNG and PDF files. Fully client-side, no uploads.",
+  "description": "Filesmith — in-browser image and PDF toolkit. Convert, combine, split, rotate and compress JPG, PNG and PDF files. Fully client-side, no uploads.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

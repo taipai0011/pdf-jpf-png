@@ -152,9 +152,9 @@ function canvasToBlob(canvas, type = 'image/jpeg', quality = 0.92) {
  */
 async function canvasToPdfBlob(canvas) {
   const pdfDoc = await PDFDocument.create();
-  pdfDoc.setTitle('Mergely Output');
-  pdfDoc.setProducer('Mergely');
-  pdfDoc.setCreator('Mergely');
+  pdfDoc.setTitle('Filesmith Output');
+  pdfDoc.setProducer('Filesmith');
+  pdfDoc.setCreator('Filesmith');
   pdfDoc.setCreationDate(new Date());
 
   const jpegBlob = await canvasToBlob(canvas, 'image/jpeg', 0.92);
@@ -215,13 +215,13 @@ export async function mergeFiles(files, options) {
     extension = 'jpg';
   }
 
-  // Build a friendly filename: mergely-<orientation>-YYYYMMDD-HHmmss.<ext>
+  // Build a friendly filename: filesmith-<orientation>-YYYYMMDD-HHmmss.<ext>
   const now = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   const stamp =
     `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}` +
     `-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-  const filename = `mergely-${orientation}-${stamp}.${extension}`;
+  const filename = `filesmith-${orientation}-${stamp}.${extension}`;
 
   // Always provide a preview-friendly image URL too; for PDFs we re-encode
   // the composed canvas as a PNG so the preview modal can show it directly.
