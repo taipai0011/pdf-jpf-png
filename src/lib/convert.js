@@ -9,7 +9,7 @@
  * Progress is reported through an optional callback: onProgress(0..1, label).
  */
 
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, degrees } from 'pdf-lib';
 import { pdfjsLib } from './pdfWorker.js';
 
 /* ------------------------------------------------------------------ */
@@ -323,4 +323,207 @@ export async function zipResults(results, zipName = 'files.zip', onProgress) {
     onProgress?.(meta.percent / 100, 'Zipping')
   );
   return { blob, filename: zipName };
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. PDF page-range parsing (shared by split)                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * "1-3, 5, 8-10" -> [1,2,3,5,8,9,10] (1-based, clamped to n, sorted, unique).
+ * Empty / blank means "all pages".
+ */
+export function parseRanges(str, n) {
+  if (!str || !str.trim()) return Array.from({ length: n }, (_, i) => i + 1);
+  const out = new Set();
+  for (const part of str.split(',')) {
+    const s = part.trim();
+    if (!s) continue;
+    const m = s.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (m) {
+      let a = +m[1];
+      let b = +m[2];
+      if (a > b) [a, b] = [b, a];
+      for (let i = a; i <= b; i += 1) if (i >= 1 && i <= n) out.add(i);
+    } else if (/^\d+$/.test(s)) {
+      const i = +s;
+      if (i >= 1 && i <= n) out.add(i);
+    }
+  }
+  return [...out].sort((a, b) => a - b);
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. Combine PDFs (page-preserving, keeps text & vectors)            */
+/* ------------------------------------------------------------------ */
+
+export async function mergePdfs(files, _opts = {}, onProgress) {
+  const pdfs = files.filter((f) => f.type === 'application/pdf');
+  if (pdfs.length < 1) throw new Error('Add at least one PDF.');
+
+  const out = await PDFDocument.create();
+  for (let i = 0; i < pdfs.length; i += 1) {
+    onProgress?.((i + 0.5) / pdfs.length, `Adding ${pdfs[i].name}`);
+    // eslint-disable-next-line no-await-in-loop
+    const src = await PDFDocument.load(await pdfs[i].blob.arrayBuffer());
+    // eslint-disable-next-line no-await-in-loop
+    const pages = await out.copyPages(src, src.getPageIndices());
+    pages.forEach((p) => out.addPage(p));
+  }
+  onProgress?.(0.98, 'Saving');
+  const bytes = await out.save();
+  return [{ blob: new Blob([bytes], { type: 'application/pdf' }), filename: 'combined.pdf' }];
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. Split PDF (extract a range, or burst every page)               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * @param {'extract'|'burst'} mode
+ * @param {string} pages  page ranges for 'extract' (blank = all)
+ */
+export async function splitPdf(files, opts = {}, onProgress) {
+  const { mode = 'extract', pages = '' } = opts;
+  const pdfs = files.filter((f) => f.type === 'application/pdf');
+  if (!pdfs.length) throw new Error('Add a PDF first.');
+
+  const results = [];
+  for (let fi = 0; fi < pdfs.length; fi += 1) {
+    const f = pdfs[fi];
+    const base = stripExt(f.name);
+    // eslint-disable-next-line no-await-in-loop
+    const src = await PDFDocument.load(await f.blob.arrayBuffer());
+    const n = src.getPageCount();
+    const wanted = parseRanges(pages, n); // 1-based
+
+    if (mode === 'burst') {
+      for (let k = 0; k < wanted.length; k += 1) {
+        const idx = wanted[k] - 1;
+        // eslint-disable-next-line no-await-in-loop
+        const one = await PDFDocument.create();
+        // eslint-disable-next-line no-await-in-loop
+        const [pg] = await one.copyPages(src, [idx]);
+        one.addPage(pg);
+        // eslint-disable-next-line no-await-in-loop
+        const bytes = await one.save();
+        results.push({
+          blob: new Blob([bytes], { type: 'application/pdf' }),
+          filename: `${base}-p${String(wanted[k]).padStart(2, '0')}.pdf`,
+        });
+        onProgress?.((k + 1) / wanted.length, `Page ${k + 1} of ${wanted.length}`);
+      }
+    } else {
+      const out = await PDFDocument.create();
+      const idxs = wanted.map((p) => p - 1);
+      // eslint-disable-next-line no-await-in-loop
+      const pgs = await out.copyPages(src, idxs);
+      pgs.forEach((p) => out.addPage(p));
+      // eslint-disable-next-line no-await-in-loop
+      const bytes = await out.save();
+      results.push({
+        blob: new Blob([bytes], { type: 'application/pdf' }),
+        filename: `${base}-extract.pdf`,
+      });
+      onProgress?.((fi + 1) / pdfs.length, `Extracting ${f.name}`);
+    }
+  }
+  return results;
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. Rotate PDF (all pages, in 90-degree steps)                     */
+/* ------------------------------------------------------------------ */
+
+/** @param {90|180|270} angle clockwise */
+export async function rotatePdf(files, opts = {}, onProgress) {
+  const { angle = 90 } = opts;
+  const pdfs = files.filter((f) => f.type === 'application/pdf');
+  if (!pdfs.length) throw new Error('Add a PDF first.');
+
+  const results = [];
+  for (let i = 0; i < pdfs.length; i += 1) {
+    const f = pdfs[i];
+    onProgress?.((i + 0.5) / pdfs.length, `Rotating ${f.name}`);
+    // eslint-disable-next-line no-await-in-loop
+    const doc = await PDFDocument.load(await f.blob.arrayBuffer());
+    doc.getPages().forEach((p) => {
+      const current = p.getRotation().angle || 0;
+      p.setRotation(degrees((current + Number(angle)) % 360));
+    });
+    // eslint-disable-next-line no-await-in-loop
+    const bytes = await doc.save();
+    results.push({
+      blob: new Blob([bytes], { type: 'application/pdf' }),
+      filename: `${stripExt(f.name)}-rotated.pdf`,
+    });
+  }
+  return results;
+}
+
+/* ------------------------------------------------------------------ */
+/* 9. Compress PDF (re-raster pages at reduced quality)              */
+/* ------------------------------------------------------------------ */
+
+const PDF_COMPRESS = {
+  light: { scale: 2, quality: 0.7 },
+  medium: { scale: 1.5, quality: 0.6 },
+  strong: { scale: 1.1, quality: 0.5 },
+};
+
+/**
+ * Rebuilds each page as a flattened JPEG image inside a fresh PDF. This drops
+ * size a lot on scan-heavy or image-heavy PDFs, but the pages become images
+ * (text stops being selectable) — that trade-off is the whole point.
+ * @param {'light'|'medium'|'strong'} level
+ */
+export async function compressPdf(files, opts = {}, onProgress) {
+  const { level = 'medium' } = opts;
+  const { scale, quality } = PDF_COMPRESS[level] || PDF_COMPRESS.medium;
+  const pdfs = files.filter((f) => f.type === 'application/pdf');
+  if (!pdfs.length) throw new Error('Add a PDF first.');
+
+  const results = [];
+  for (let fi = 0; fi < pdfs.length; fi += 1) {
+    const f = pdfs[fi];
+    // eslint-disable-next-line no-await-in-loop
+    const data = await f.blob.arrayBuffer();
+    // eslint-disable-next-line no-await-in-loop
+    const doc = await pdfjsLib.getDocument({ data }).promise;
+    const out = await PDFDocument.create();
+
+    for (let p = 1; p <= doc.numPages; p += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      const page = await doc.getPage(p);
+      const ptView = page.getViewport({ scale: 1 }); // page size in PDF points
+      const rView = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.floor(rView.width));
+      canvas.height = Math.max(1, Math.floor(rView.height));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // eslint-disable-next-line no-await-in-loop
+      await page.render({ canvasContext: ctx, viewport: rView }).promise;
+      // eslint-disable-next-line no-await-in-loop
+      const jpg = await canvasToBlob(canvas, 'image/jpeg', quality);
+      // eslint-disable-next-line no-await-in-loop
+      const img = await out.embedJpg(new Uint8Array(await jpg.arrayBuffer()));
+      const pg = out.addPage([ptView.width, ptView.height]);
+      pg.drawImage(img, { x: 0, y: 0, width: ptView.width, height: ptView.height });
+      onProgress?.((p / doc.numPages), `Page ${p} of ${doc.numPages}`);
+    }
+    // eslint-disable-next-line no-await-in-loop
+    await doc.destroy();
+    // eslint-disable-next-line no-await-in-loop
+    const bytes = await out.save();
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    results.push({
+      blob,
+      filename: `${stripExt(f.name)}-compressed.pdf`,
+      before: f.size,
+      after: blob.size,
+    });
+  }
+  return results;
 }

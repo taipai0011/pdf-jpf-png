@@ -4,6 +4,24 @@
  * (0.7) work without extra plumbing.
  */
 export default function OptionField({ field, value, onChange }) {
+  if (field.type === 'text') {
+    return (
+      <div>
+        <div className="field-label mb-2.5">{field.label}</div>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={value ?? ''}
+          placeholder={field.placeholder || ''}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full rounded-lg bg-white px-3 py-2.5 text-sm text-ink-800 placeholder:text-ink-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400/60"
+          style={{ border: '1.5px solid rgba(109,74,255,0.14)' }}
+        />
+        {field.hint && <div className="mt-1.5 text-[11px] text-ink-400">{field.hint}</div>}
+      </div>
+    );
+  }
+
   const cols = field.choices.length;
   return (
     <div>

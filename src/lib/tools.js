@@ -9,14 +9,27 @@
  */
 
 import {
+  Combine,
+  FileArchive,
   FileImage,
   FileStack,
   Images,
   Minimize2,
   Replace,
+  RotateCw,
+  Scissors,
 } from 'lucide-react';
 
-import { compressImages, convertImages, imagesToPdf, pdfToImages } from './convert.js';
+import {
+  compressImages,
+  compressPdf,
+  convertImages,
+  imagesToPdf,
+  mergePdfs,
+  pdfToImages,
+  rotatePdf,
+  splitPdf,
+} from './convert.js';
 import { mergeFiles } from './merge.js';
 
 const IMAGE_TYPES = 'image/jpeg,image/png,image/webp,image/gif,image/bmp';
@@ -105,6 +118,110 @@ export const TOOLS = [
       },
     ],
     run: pdfToImages,
+  },
+
+  {
+    id: 'merge-pdf',
+    name: 'Combine PDFs',
+    tag: 'Many PDFs → one',
+    blurb: 'Join several PDFs into a single file, in the order you drag them. Text and pages stay intact — nothing gets flattened into an image.',
+    accent: '#6d4aff',
+    icon: Combine,
+    accept: PDF_TYPE,
+    dropTitle: 'Drop PDFs to join together',
+    dropHint: 'Drag to set which file comes first',
+    reorderable: true,
+    runLabel: 'Combine into one PDF',
+    options: [],
+    run: mergePdfs,
+  },
+
+  {
+    id: 'split-pdf',
+    name: 'Split a PDF',
+    tag: 'Pull pages out',
+    blurb: 'Keep only the pages you want as one new PDF, or burst every page into its own file. Leave the range blank to take all pages.',
+    accent: '#7c5cff',
+    icon: Scissors,
+    accept: PDF_TYPE,
+    dropTitle: 'Drop a PDF to split',
+    dropHint: 'Extract a page range or break it apart',
+    reorderable: false,
+    runLabel: 'Split PDF',
+    options: [
+      {
+        key: 'mode',
+        label: 'What to do',
+        default: 'extract',
+        choices: [
+          { value: 'extract', label: 'Keep chosen pages' },
+          { value: 'burst', label: 'Every page separate' },
+        ],
+      },
+      {
+        key: 'pages',
+        label: 'Pages',
+        type: 'text',
+        default: '',
+        placeholder: 'e.g. 1-3, 5, 8-10',
+        hint: 'Leave blank for all pages',
+      },
+    ],
+    run: splitPdf,
+  },
+
+  {
+    id: 'rotate-pdf',
+    name: 'Rotate a PDF',
+    tag: 'Fix sideways pages',
+    blurb: 'Turn every page of a PDF the same way — handy when a scan came out sideways or upside down.',
+    accent: '#9b80ff',
+    icon: RotateCw,
+    accept: PDF_TYPE,
+    dropTitle: 'Drop a PDF to rotate',
+    dropHint: 'All pages turn the same direction',
+    reorderable: false,
+    runLabel: 'Rotate PDF',
+    options: [
+      {
+        key: 'angle',
+        label: 'Turn clockwise by',
+        default: 90,
+        choices: [
+          { value: 90, label: '90°' },
+          { value: 180, label: '180°' },
+          { value: 270, label: '270°' },
+        ],
+      },
+    ],
+    run: rotatePdf,
+  },
+
+  {
+    id: 'compress-pdf',
+    name: 'Shrink a PDF',
+    tag: 'Smaller file size',
+    blurb: 'Bring a heavy PDF down to an emailable size. Pages get re-saved as compressed images, so the text stops being selectable — pick how hard to squeeze.',
+    accent: '#5a37e0',
+    icon: FileArchive,
+    accept: PDF_TYPE,
+    dropTitle: 'Drop a PDF to compress',
+    dropHint: 'Best on scans and image-heavy files',
+    reorderable: false,
+    runLabel: 'Compress PDF',
+    options: [
+      {
+        key: 'level',
+        label: 'How hard to squeeze',
+        default: 'medium',
+        choices: [
+          { value: 'light', label: 'Light' },
+          { value: 'medium', label: 'Balanced' },
+          { value: 'strong', label: 'Smallest' },
+        ],
+      },
+    ],
+    run: compressPdf,
   },
 
   {
