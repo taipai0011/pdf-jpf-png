@@ -2,14 +2,17 @@ import { useCallback, useRef, useState } from 'react';
 import { UploadCloud } from 'lucide-react';
 
 /**
- * Compact, ilovepdf-style drop zone:
- *  - Bold purple solid fill
- *  - White dashed inner border
- *  - Icon + tagline on the left, pill-shaped white "Choose files" CTA on the right
- *  - About half the height of the previous airy variant
- *  - Hovers and drag-over deepen the gradient and tighten the border
+ * Bold purple drop zone with a dashed inner frame. All copy and the accepted
+ * file types are passed in per tool, so the same component serves every tool.
  */
-export default function DropZone({ onFiles, busy }) {
+export default function DropZone({
+  onFiles,
+  busy,
+  title = 'Drop files here',
+  hint = 'Everything stays in your browser',
+  accept = 'image/jpeg,image/png,application/pdf',
+  cta = 'Choose files',
+}) {
   const inputRef = useRef(null);
   const [hovering, setHovering] = useState(false);
 
@@ -33,7 +36,7 @@ export default function DropZone({ onFiles, busy }) {
   return (
     <div className="mx-auto max-w-6xl px-5 sm:px-8">
       <label
-        htmlFor="mergely-input"
+        htmlFor="file-input"
         onDragOver={(e) => {
           e.preventDefault();
           if (!hovering) setHovering(true);
@@ -50,7 +53,6 @@ export default function DropZone({ onFiles, busy }) {
             : '0 10px 28px -10px rgba(109,74,255,0.45), 0 4px 14px rgba(109,74,255,0.28)',
         }}
       >
-        {/* Soft top sheen for depth */}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -60,7 +62,6 @@ export default function DropZone({ onFiles, busy }) {
           aria-hidden
         />
 
-        {/* Dashed inner frame */}
         <div
           className="relative m-3 sm:m-4 rounded-xl flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 sm:gap-6 px-5 sm:px-7 py-5 sm:py-6 transition-colors duration-200"
           style={{
@@ -80,11 +81,9 @@ export default function DropZone({ onFiles, busy }) {
             </div>
             <div className="text-center sm:text-left min-w-0">
               <div className="text-white text-base sm:text-lg font-semibold tracking-tight leading-tight">
-                Drop files to merge
+                {title}
               </div>
-              <div className="text-white/75 text-xs sm:text-sm leading-snug">
-                JPG, PNG or PDF &middot; stays in your browser
-              </div>
+              <div className="text-white/75 text-xs sm:text-sm leading-snug">{hint}</div>
             </div>
           </div>
 
@@ -101,15 +100,15 @@ export default function DropZone({ onFiles, busy }) {
                 '0 1px 0 rgba(255,255,255,0.6) inset, 0 6px 16px -4px rgba(15,13,26,0.18), 0 2px 4px rgba(15,13,26,0.10)',
             }}
           >
-            {busy ? 'Reading...' : 'Choose files'}
+            {busy ? 'Reading files' : cta}
           </button>
         </div>
 
         <input
           ref={inputRef}
-          id="mergely-input"
+          id="file-input"
           type="file"
-          accept="image/jpeg,image/png,image/jpg,application/pdf"
+          accept={accept}
           multiple
           className="hidden"
           onChange={(e) => {

@@ -63,12 +63,12 @@ export function useFiles() {
   }, [refresh]);
 
   const addFiles = useCallback(
-    async (incoming) => {
-      const accepted = Array.from(incoming).filter(isAccepted);
+    async (incoming, restrict, rejectMsg) => {
+      const accepted = Array.from(incoming).filter((f) => isAccepted(f, restrict));
       const rejected = Array.from(incoming).length - accepted.length;
       if (accepted.length === 0) {
         if (rejected > 0) {
-          setError('Only JPG, PNG, and PDF files are supported.');
+          setError(rejectMsg || 'That file type isn\u2019t supported here.');
           setTimeout(() => setError(null), 4000);
         }
         return;
@@ -90,7 +90,7 @@ export function useFiles() {
         }
         await refresh();
         if (rejected > 0) {
-          setError(`${rejected} unsupported file${rejected === 1 ? '' : 's'} skipped.`);
+          setError(rejectMsg || `${rejected} file${rejected === 1 ? '' : 's'} skipped \u2014 wrong type for this tool.`);
           setTimeout(() => setError(null), 4000);
         }
       } catch (e) {
