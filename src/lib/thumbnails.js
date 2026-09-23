@@ -82,12 +82,34 @@ export async function generateThumbnail(blob, type) {
   return imageThumbnail(blob);
 }
 
-export const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+export const ACCEPTED_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/bmp',
+  'application/pdf',
+];
 
-export function isAccepted(file) {
-  if (ACCEPTED_TYPES.includes(file.type)) return true;
-  // Some browsers report empty type for files dropped from certain sources;
-  // fall back to extension sniffing.
+const ACCEPTED_EXT = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.pdf'];
+
+/**
+ * `restrict` optionally narrows what a specific tool will take, e.g.
+ * ['image'] for image-only tools or ['application/pdf'] for PDF-only tools.
+ * When omitted, any generally-supported type is accepted.
+ */
+export function isAccepted(file, restrict) {
   const name = file.name.toLowerCase();
-  return name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.pdf');
+  const typeOk =
+    ACCEPTED_TYPES.includes(file.type) || ACCEPTED_EXT.some((e) => name.endsWith(e));
+  if (!typeOk) return false;
+  if (!restrict || restrict.length === 0) return true;
+
+  const isPdf = file.type === 'application/pdf' || name.endsWith('.pdf');
+  return restrict.some((r) => {
+    if (r === 'application/pdf') return isPdf;
+    if (r === 'image') return !isPdf;
+    return file.type === r;
+  });
 }
